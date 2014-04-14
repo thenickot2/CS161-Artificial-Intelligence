@@ -1,13 +1,16 @@
-(setq EXPV001 'CON004)
-(setq CON004 '(SEE AGENT AG002
-OBJECT OBJ002))
-(setq AG002 'CON005)
-(setq CON005 '(HUMAN F-NAME (CHARLOTTE)
-L-NAME ( )
-GENDER (FEMALE)))
-(setq OBJ002 '(HUMAN F-NAME (CHARLES)
-L-NAME ( )
-GENDER (MALE)))
+;remove top level symbol
+(defun removeTopLevelSym (frame)
+	(cond
+		((symbolp frame)
+			(cond
+				((boundp frame) (removeTopLevelSym (eval frame)))
+				(t frame)
+			)
+		)
+		(t frame)
+	)
+)
+
 ;Recursively finds slot and return filler(position+1).
 (defun FILLER_helper (slot frame number)
     (cond
@@ -20,7 +23,7 @@ GENDER (MALE)))
 )
 ;Takes a slot and a frame and returns the filler of that slot.
 (defun FILLER (slot frame)
-	(FILLER_helper slot frame 1)
+	(FILLER_helper slot (removeTopLevelSym frame) 1)
 )
 
 ;Takes a list of slots and uses them to path into a concept 
@@ -77,11 +80,58 @@ GENDER (MALE)))
 	)
 )
 
+;replace filler
+(defun replaceSlot (filler frame number)
+	(cond
+		((and (not(null (subseq frame 0 number))) (not(null (nthcdr (+ number 1) frame)))) (append (subseq frame 0 number) (list filler) (nthcdr (+ number 1) frame)))
+		((not(null (subseq frame 0 number))) (append (subseq frame 0 number) (list filler)))
+		((not(null (nthcdr (+ number 1) frame))) (append (list filler) (nthcdr (+ number 1) frame)))
+		(t (list filler))
+	)
+)
+;search for slot and replace if found
+(defun searchAndReplace (slot filler frame number)
+	(cond
+		((null(nth number frame)) (append frame (list slot filler)))
+		((equal (nth number frame) slot) (replaceSlot filler frame (+ number 1)))
+		(t (searchAndReplace slot filler frame (+ number 2)))
+	)
+)
 ;Adds a top-level slot with filler to a frame.
 (defun ADD-SF (slot filler frame)
-
+	;remove top level filter -> replace filler
+	(searchAndReplace slot filler (removeTopLevelSym frame) 1)
 )
 
-(format t "~S"
-	(UNGAP 'EXPV001)
+;is element a member?
+(defun isMember (a b)
+	(cond
+		((equal a b) t)
+		((not (listp b)) nil)
+		((null a) nil)
+		((null b) nil)
+		((equal a (first b)) t)
+		(t (isMember a (rest b)))
+	)
+)
+;compute subset
+(defun subset (a b)
+  (if (endp a) T
+    (and (isMember (first a) b) (subset (rest a) b)))
+)
+;find if sets have same members
+(defun set-equal (a b)
+	(and (subset a b) (subset b a))
+)
+;return list of top slots
+(defun topSlotList (frame)
+	(cond
+	((null frame) nil)
+	((NOT (listp frame)) nil)
+	(t (append (List (first frame)) (nthcdr 2 frame)))
+	)
+)
+;Returns T if frame1 and frame2 have the same slot-filler structure.
+(defun SAME-SF (frame1 frame2)
+	(set-equal (topSlotList (rest (UNGAP frame1))) (topSlotList (rest (UNGAP frame2))))
 )
