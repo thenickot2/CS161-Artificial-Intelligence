@@ -32,9 +32,9 @@
 	(cond
 		;Base case:
 		((null concept) nil)
-		((equal (length slots) 1) (FILLER (first slots) concept)) ;last slot, start to return
+		((equal (length slots) 1) (FILLER (first slots) (removeTopLevelSym concept))) ;last slot, start to return
 		; Recursive case: increment position in frame
-		(t (PATH-SL (rest slots) (FILLER (first slots) concept)))
+		(t (PATH-SL (rest slots) (FILLER (first slots) (removeTopLevelSym concept))))
 	)
 )
 

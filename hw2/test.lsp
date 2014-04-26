@@ -1,0 +1,5 @@
+(setq USEDMEM NIL)
+(setq CON1 '(HUMAN F-NAME (CHARLOTTE)))
+(BIND 'NEW-NAME 'CON1)
+(format t "~D~%"
+    (TOP-CON '(CON1 CON2 CON3) '(CON3 CON1)))

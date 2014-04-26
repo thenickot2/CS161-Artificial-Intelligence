@@ -1,0 +1,22 @@
+Propositional Logic
+
+Prop Logic=atomic proposition
+	John is 18 ^ John is 17
+Agent
+	Perceive, Thinks, Acts
+	Thinks -> prop logic statements -> tell knowledgebase
+A=>B means Not(A) or B
+	"implies" but not really implies
+"," can mean AND
+"|=" means entails
+	KB says A,-A or B
+		entails B has to be true; |=B
+"|-" means derived via some algorithm
++x,y->z
+	2,2->4
+	there is just one addition function for infinite mappings
+Algorithm
+	Soundness->truth preserving
+	Completeness->if true then alg finds it
+Conjunctive Anded Form
+	(..OR..)AND(..OR..)AND...
