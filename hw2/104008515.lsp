@@ -442,15 +442,18 @@
 (defun SPAWN-helper (partial-dems mycon)
 	(let ((frame (first partial-dems)))
 	(cond
-		((null (second partial-dems)) (append (first frame) (list mycon) (rest frame)))
-		(t  (append (first frame) (list mycon) (rest frame) (SPAWN-helper (second partial-dems))))
+		((null (second partial-dems)) (list(append (list (first frame)) (list mycon) (rest frame))))
+		(t  (append (list (append (list (first frame)) (list mycon) (rest frame))) (SPAWN-helper (rest partial-dems) mycon)))
 	))
 )
 (defun SPAWN (partial-dems mycon)
-    (let ((completed (SPAWN-helper partial-dems mycon))) (progn
+	(cond 
+	((null partial-dems) nil)
+    (t (let ((completed (SPAWN-helper partial-dems mycon))) (progn
 		(setq DEMEM (append completed DEMEM))
 		completed
-	))
+	)))
+	)
 )
 
 ; -----------------------------------------------------------------------------
@@ -470,8 +473,8 @@
 (defun POLL-DEMS-poll (demlist position numNil)
 	(cond
 	((equal numNil (length demlist)) demlist)
-	((> position (length demlist)) (POLL-DEMS-poll demlist 0 0))
-	(t (let ((result (eval (nth position demlist))))
+	((equal position (length demlist)) (POLL-DEMS-poll demlist 0 0))
+	(t (let ((result (apply (first (nth position demlist)) (rest (nth position demlist)))))
 		(cond
 			((equal result nil) (POLL-DEMS-poll demlist (+ position 1) (+ numNil 1)))
 			(t (POLL-DEMS-poll (remove (nth position demlist) demlist) position 0))
@@ -514,7 +517,16 @@
 ;        lexic (list) - a conceptual lexicon (see problem 1)
 
 (defun C-ANALYZER (sent lexic)
-    'UNIMPLEMENTED
+	(cond 
+	((not (null sent)) 
+		(let ((longestSent (NEXT-PH sent lexic))) (progn
+			(INSTAN-CON longestSent WKMEM)
+			(SPAWN longestSent (first (last WKMEM)))
+			(POLL-DEMS DEMEM)
+		))
+	)
+	(t (every #'UNGAP (TOP-CON WKMEM USEDMEM)))
+	)
 )
 
 ; -----------------------------------------------------------------------------
@@ -560,7 +572,7 @@
     (let ((found (SRCH WKMEM mycon dir pred)))
 		(cond
 		((not (null found)) (progn 
-			(BIND (FILLER myslot mycon) found)
+			(BIND (FILLER myslot (eval mycon)) found)
 			'(DIE)))
 		(t nil)
 		)
