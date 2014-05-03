@@ -281,52 +281,52 @@
 ; OUTPUT: frame-reference atom if successful, NIL otherwise
 (defun SRCH-aft (atmlst myatm pred found)
 	(cond
-		((equal atmlst nil) nil)
-		((equal found nil) (cond
-			((equal (first atmlst) myatm) (SRCH-aft (rest atmlst) myatm pred 1))
-			(t (SRCH-aft (rest atmlst) myatm pred nil))
+		((null atmlst) nil)
+		((null found) (cond
+				((equal myatm (first atmlst)) (SRCH-aft (rest atmlst) myatm pred 1))
+				(t (SRCH-aft (rest atmlst) myatm pred nil))
 		))
 		(t (cond
-			((equal (first (eval (first atmlst))) pred) (first atmlst))
+			((equal pred (first (eval (first atmlst)))) (first atmlst))
 			(t (SRCH-aft (rest atmlst) myatm pred 1))
 		))
 	)
 )
 (defun SRCH-imaft (atmlst myatm pred found)
 	(cond
-		((equal atmlst nil) nil)
-		((equal found nil) (cond
-			((equal (first atmlst) myatm) (SRCH-imaft (rest atmlst) myatm pred 1))
-			(t (SRCH-imaft (rest atmlst) myatm pred nil))
+		((null atmlst) nil)
+		((null found) (cond
+				((equal myatm (first atmlst)) (SRCH-imaft (rest atmlst) myatm pred 1))
+				(t (SRCH-imaft (rest atmlst) myatm pred nil))
 		))
 		(t (cond
-			((equal (first (eval (first atmlst))) pred) (first atmlst))
+			((equal pred (first (eval (first atmlst)))) (first atmlst))
 			(t nil)
 		))
 	)
 )
 (defun SRCH-bef (atmlst myatm pred found)
 	(cond
-		((equal atmlst nil) nil)
-		((equal found nil) (cond
-			((equal (first (last atmlst)) myatm) (SRCH-bef (butlast atmlst) myatm pred 1))
-			(t (SRCH-bef (butlast atmlst) myatm pred nil))
+		((null atmlst) nil)
+		((null found) (cond
+				((equal myatm (first(last atmlst))) (SRCH-bef (butlast atmlst) myatm pred 1))
+				(t (SRCH-bef (butlast atmlst) myatm pred nil))
 		))
 		(t (cond
-			((equal (first (eval (first (last atmlst)))) pred) (first (last atmlst)))
+			((equal pred (first (eval (first(last atmlst))))) (first (last atmlst)))
 			(t (SRCH-bef (butlast atmlst) myatm pred 1))
 		))
 	)
 )
 (defun SRCH-imbef (atmlst myatm pred found)
 	(cond
-		((equal atmlst nil) nil)
-		((equal found nil) (cond
-			((equal (first (last atmlst)) myatm) (SRCH-imbef (butlast atmlst) myatm pred 1))
-			(t (SRCH-imbef (butlast atmlst) myatm pred nil))
+		((null atmlst) nil)
+		((null found) (cond
+				((equal myatm (first(last atmlst))) (SRCH-imbef (butlast atmlst) myatm pred 1))
+				(t (SRCH-imbef (butlast atmlst) myatm pred nil))
 		))
 		(t (cond
-			((equal (first (eval (first (last atmlst)))) pred) (first (last atmlst)))
+			((equal pred (first (eval (first(last atmlst))))) (first (last atmlst)))
 			(t nil)
 		))
 	)
@@ -356,9 +356,8 @@
 
 (defun BIND (gap found)
     (progn
-		(setq USEDMEM (append (list found) USEDMEM))
+		(setq USEDMEM (append USEDMEM (list found)))
 		(setq gap found)
-		found
 	)
 )
 
@@ -442,18 +441,15 @@
 (defun SPAWN-helper (partial-dems mycon)
 	(let ((frame (first partial-dems)))
 	(cond
-		((null (second partial-dems)) (list(append (list (first frame)) (list mycon) (rest frame))))
+		((null (second partial-dems)) (append (list (append (list (first frame)) (list mycon) (rest frame)))))
 		(t  (append (list (append (list (first frame)) (list mycon) (rest frame))) (SPAWN-helper (rest partial-dems) mycon)))
 	))
 )
 (defun SPAWN (partial-dems mycon)
-	(cond 
-	((null partial-dems) nil)
-    (t (let ((completed (SPAWN-helper partial-dems mycon))) (progn
+    (let ((completed (SPAWN-helper partial-dems mycon))) (progn
 		(setq DEMEM (append completed DEMEM))
 		completed
-	)))
-	)
+	))
 )
 
 ; -----------------------------------------------------------------------------
@@ -470,20 +466,9 @@
 ; INPUT: demlist (list): list of demon instances
 ;        wkm (list): list of CON-atoms (which evaluate to frames)
 ; OUTPUT: list of demons still remaining after quiescence is reached
-(defun POLL-DEMS-poll (demlist position numNil)
-	(cond
-	((equal numNil (length demlist)) demlist)
-	((equal position (length demlist)) (POLL-DEMS-poll demlist 0 0))
-	(t (let ((result (apply (first (nth position demlist)) (rest (nth position demlist)))))
-		(cond
-			((equal result nil) (POLL-DEMS-poll demlist (+ position 1) (+ numNil 1)))
-			(t (POLL-DEMS-poll (remove (nth position demlist) demlist) position 0))
-		)
-	))
-	)
-)
-(defun POLL-DEMS (demlist)
-    (POLL-DEMS-poll demlist 0 0)
+
+(defun POLL-DEMS (demlist wkm)
+    'UNIMPLEMENTED
 )
 
 ; -----------------------------------------------------------------------------
@@ -497,7 +482,7 @@
 ; OUTPUT: List of atoms in wkm that do not appear in USED
 
 (defun TOP-CON (wkm used)
-    (set-difference wkm used :test 'equal)
+    'UNIMPLEMENTED
 )
 
 ; -----------------------------------------------------------------------------
@@ -517,7 +502,7 @@
 ;        lexic (list) - a conceptual lexicon (see problem 1)
 
 (defun C-ANALYZER (sent lexic)
-	'NotWorking
+    'UNIMPLEMENTED
 )
 
 ; -----------------------------------------------------------------------------
@@ -560,14 +545,13 @@
 ; OUTPUT: (DIE) if successfully executed and bound, nil otherwise
 
 (defun DM-EXP (mycon pred dir myslot)
-    (let ((found (SRCH WKMEM mycon dir pred)))
-		(cond
-		((not (null found)) (progn 
+    (let ((found (SRCH WKMEM mycon dir pred))) (cond
+		((not (null found)) (progn
 			(BIND (FILLER myslot (eval mycon)) found)
-			'(DIE)))
+			(DIE)
+		))
 		(t nil)
-		)
-	)
+	))
 )
 
 ; ****** END SECTION 3 ******
