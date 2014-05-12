@@ -1,0 +1,11 @@
+(setq DEMEM '())
+(setq WKMEM '(CON1 CON2 CON3 CON4 CON5))
+(setq USEDMEM '(CON1))
+(setq CON1 '(MODIF AGE AGE7))
+(setq CON2 '(HUMAN F-NAME FNM8))
+(setq CON3 '(HUMAN F-NAME(EMMA)))
+(setq CON4 '(THAT))
+(setq CON5 '(EMOTION SENTIM (POS) SCALE (>NORM)))
+(DM-FNAME 'CON2 'HUMAN 'IM-AFT 'F-NAME)
+
+;(format t "~D~%" LNM)
