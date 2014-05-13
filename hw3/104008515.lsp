@@ -538,7 +538,17 @@
 ; SIDE-EFFECT: Adds found CON atom to USEDMEM
 
 (defun DM-FINDHER (mycon pred slot filler dir myslot)
-    'UNIMPLEMENTED
+    (let ((theAtm (SRCH WKMEM mycon dir pred)))
+		(cond
+			((null theAtm) nil)
+			((equal filler (FILLER slot (eval theAtm))) (progn
+				(set (FILLER myslot (eval mycon)) theAtm)
+				(setq USEDMEM (append USEDMEM (list theAtm)))
+				'(die)
+			))
+			(t nil)
+		)
+	)
 )
 
 ; -----------------------------------------------------------------------------
@@ -556,7 +566,14 @@
 ; OUTPUTS: (DIE) if search successful, nil otherwise
 
 (defun DM-MODIF2 (mycon mypred dir myslot)
-    'UNIMPLEMENTED
+    (let ((theAtm (SRCH WKMEM mycon dir mypred)))
+        (cond
+			((not(null theAtm)) (progn 
+				(set theAtm (INSERT-SL myslot (FILLER myslot (eval mycon)) theAtm))
+				'(die)))
+			(t nil)
+		)
+	)
 )
 
 ; -----------------------------------------------------------------------------
@@ -576,8 +593,41 @@
 ;          filler        - FILLER belonging to slot of query frame
 ; OUTPUTS: (DIE) if search successful, nil otherwise
 
+(defun SRCH-modif (atmlst myatm dir pred slot filler &optional found)
+    (cond
+        ; As a first step, find our starting CON. Flag that we found it
+        ; by setting optional parameter "found"
+        ((not found) (SRCH-modif (START-SRCH atmlst myatm dir) myatm dir pred slot filler t))
+        
+        ; Base case: searched everything
+        ((null atmlst) nil)
+        
+        ; We already found the start atom, so start looking at predicates
+        (t
+             ; See if pred matches (have to expand the first atm in atmlst
+             ; into its frame representation first)
+             (if (and (ISA (first (eval (first atmlst))) pred ISAMEM) (equal filler (FILLER slot (eval (first atmlst)))))
+                 ; A match, so return it
+                 (first atmlst)
+                 ; Else, no match; remove and try again
+                 ; (add optional argument "found" since we did find con)
+                 (SRCH-modif (rest atmlst) myatm dir pred slot filler t)
+             )
+        )
+    )
+)
 (defun DM-HIM-FNAME (mycon myslot dir pred slot filler)
-    'UNIMPLEMENTED
+    (let ((theAtm (SRCH-modif WKMEM mycon dir pred slot filler)))
+		(cond
+			((null theAtm) nil)
+			((not (null (FILLER myslot (eval theAtm)))) (progn
+				(set (FILLER myslot (eval mycon)) (FILLER myslot (eval theAtm)))
+				(setq USEDMEM (append USEDMEM (list mycon)))
+				'(die)
+			))
+			(t nil)
+		)
+	)
 )
 
 ; -----------------------------------------------------------------------------
@@ -589,7 +639,10 @@
 ; OUTPUTS: (DIE) if search successful, nil otherwise
 
 (defun DM-USED (mycon)
-    'UNIMPLEMENTED
+	(progn
+		(setq USEDMEM (append USEDMEM (list mycon)))
+		'(die)
+	)
 )
 
 ; -----------------------------------------------------------------------------
